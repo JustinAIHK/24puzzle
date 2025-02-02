@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<div class="puzzle-container" style="max-width: 600px; margin: 0 auto; text-align: center;">
+  <h2 style="color: #333;">24 Puzzle Game</h2>
+  <div id="game-grid" style="display: grid; grid-template-columns: repeat(5, 50px); gap: 5px; margin: 20px auto; justify-content: center;"></div>
+  <div class="controls" style="margin-top: 20px;">
+    <button onclick="move('w')" style="padding: 10px 20px; background: #0073aa; color: white; border: none; cursor: pointer;">Up (W)</button>
+    <button onclick="move('s')" style="padding: 10px 20px; background: #0073aa; color: white; border: none; cursor: pointer;">Down (S)</button>
+    <button onclick="move('a')" style="padding: 10px 20px; background: #0073aa; color: white; border: none; cursor: pointer;">Left (A)</button>
+    <button onclick="move('d')" style="padding: 10px 20px; background: #0073aa; color: white; border: none; cursor: pointer;">Right (D)</button>
+  </div>
+  <div style="text-align: center; margin-top: 15px;">
+    Time: <span id="game-timer">00:00</span>
+  </div>
+  <button id="start-btn" style="padding: 10px 20px; background: #0073aa; color: white; border: none; cursor: pointer; margin-top: 20px;">Start Game</button>
+  <button id="auto-sort-btn" style="padding: 10px 20px; background: #28a745; color: white; border: none; cursor: pointer; margin-top: 10px;">Auto Sort</button>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  let grid = [], emptyRow = 4, emptyCol = 4, timerInterval, startTime, isAutoSorting = false;
+
+  function initGame() {
+    grid = [];
+    let num = 1;
+    for (let i = 0; i < 5; i++) {
+      let row = [];
+      for (let j = 0; j < 5; j++) {
+        row.push((i === 4 && j === 4) ? 0 : num++);
+      }
+      grid.push(row);
+    }
+    shuffleGrid();
+    renderGrid();
+    document.getElementById('start-btn').disabled = true;
+    document.getElementById('auto-sort-btn').disabled = false;
+  }
+
+  function shuffleGrid() {
+    const directions = ['w', 's', 'a', 'd'];
+    for (let i = 0; i < 1000; i++) {
+      const dir = directions[Math.floor(Math.random() * directions.length)];
+      move(dir, true);
+    }
+    startTime = Date.now();
+    timerInterval = setInterval(updateTimer, 1000);
+  }
+
+  function renderGrid() {
+    const gridElement = document.getElementById('game-grid');
+    gridElement.innerHTML = '';
+    for (let i = 0; i < 5; i++) {
+      for (let j = 0; j < 5; j++) {
+        const cell = document.createElement('div');
+        cell.className = `puzzle-cell ${grid[i][j] === 0 ? 'empty' : ''}`;
+        cell.textContent = grid[i][j] === 0 ? '' : grid[i][j];
+        gridElement.appendChild(cell);
+      }
+    }
+  }
+
+  function move(dir, isShuffling = false) {
+    let newRow = emptyRow;
+    let newCol = emptyCol;
+
+    if (dir === 'w' && emptyRow < 4) newRow++; // Move number below up
+    else if (dir === 's' && emptyRow > 0) newRow--; // Move number above down
+    else if (dir === 'a' && emptyCol < 4) newCol++; // Move number to the right left
+    else if (dir === 'd' && emptyCol > 0) newCol--; // Move number to the left right
+
+    if (newRow !== emptyRow || newCol !== emptyCol) {
+      grid[emptyRow][emptyCol] = grid[newRow][newCol];
+      grid[newRow][newCol] = 0;
+      emptyRow = newRow;
+      emptyCol = newCol;
+      renderGrid();
+      if (!isShuffling && checkWin()) {
+        clearInterval(timerInterval);
+        alert(`Congratulations! You solved the puzzle in ${document.getElementById('game-timer').textContent}!`);
+      }
+    }
+  }
+
+  function checkWin() {
+    let num = 1;
+    for (let i = 0; i < 5; i++) {
+      for (let j = 0; j < 5; j++) {
+        if (i === 4 && j === 4) {
+          if (grid[i][j] !== 0) return false;
+        } else {
+          if (grid[i][j] !== num++) return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  function updateTimer() {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const mins = Math.floor(elapsed / 60);
+    const secs = elapsed % 60;
+    document.getElementById('game-timer').textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }
+
+  function autoSort() {
+    if (isAutoSorting) return;
+    isAutoSorting = true;
+    document.getElementById('auto-sort-btn').disabled = true;
+
+    const solveSequence = getSolveSequence();
+    let step = 0;
+
+    const interval = setInterval(() => {
+      if (step >= solveSequence.length) {
+        clearInterval(interval);
+        isAutoSorting = false;
+        document.getElementById('auto-sort-btn').disabled = false;
+        return;
+      }
+      move(solveSequence[step]);
+      step++;
+    }, 500); // Adjust speed (500ms per move)
+  }
+
+  function getSolveSequence() {
+    // A simple sequence to solve the puzzle (for demonstration purposes)
+    // This is not optimal but works for small grids
+    const sequence = [];
+    for (let i = 0; i < 5; i++) {
+      for (let j = 0; j < 5; j++) {
+        if (i === 4 && j === 4) continue; // Skip the empty space
+        const targetRow = Math.floor((grid[i][j] - 1) / 5);
+        const targetCol = (grid[i][j] - 1) % 5;
+        if (i !== targetRow || j !== targetCol) {
+          // Move the number to its correct position
+          while (i < targetRow) {
+            sequence.push('s'); // Move down
+            i++;
+          }
+          while (i > targetRow) {
+            sequence.push('w'); // Move up
+            i--;
+          }
+          while (j < targetCol) {
+            sequence.push('d'); // Move right
+            j++;
+          }
+          while (j > targetCol) {
+            sequence.push('a'); // Move left
+            j--;
+          }
+        }
+      }
+    }
+    return sequence;
+  }
+
+  document.getElementById('start-btn').addEventListener('click', initGame);
+  document.getElementById('auto-sort-btn').addEventListener('click', autoSort);
+
+  // Keyboard controls
+  document.addEventListener('keydown', (e) => {
+    const key = e.key.toLowerCase();
+    if (['w', 'a', 's', 'd'].includes(key)) {
+      move(key);
+    }
+  });
+});
+</script>
+
+<style>
+.puzzle-cell {
+  background: #0073aa;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  border-radius: 4px;
+  font-weight: bold;
+}
+.puzzle-cell.empty {
+  background: #f0f0f1;
+}
+</style>
