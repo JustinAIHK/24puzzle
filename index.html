@@ -67,7 +67,7 @@
         startTime,
         isAutoSorting = false;
       let initialGrid = [];
-      let initialEmptyRow, initialEmptyCol; // Track initial empty position
+      let initialEmptyRow, initialEmptyCol;
       let shuffleMoves = [];
 
       // Initialize the game grid in a shuffled state
@@ -83,11 +83,8 @@
         }
         shuffleGrid();
         initialGrid = JSON.parse(JSON.stringify(grid));
-        
-        // Capture initial empty position after shuffling
         initialEmptyRow = emptyRow;
         initialEmptyCol = emptyCol;
-        
         renderGrid();
       }
 
@@ -99,15 +96,15 @@
 
         while (validMoves < 100) {
           const dir = directions[Math.floor(Math.random() * directions.length)];
-          if (move(dir, true, true)) {
+          if (move(dir, true)) {
             shuffleMoves.push(dir);
             validMoves++;
           }
         }
       }
 
-      // Move tiles (fixed to ensure single empty cell)
-      function move(dir, isShuffling = false, trackMove = false) {
+      // Move tiles
+      function move(dir, isShuffling = false) {
         let newRow = emptyRow;
         let newCol = emptyCol;
 
@@ -117,7 +114,6 @@
         else if (dir === 'd' && emptyCol > 0) newCol--;
 
         if (newRow !== emptyRow || newCol !== emptyCol) {
-          // Ensure only one empty cell exists
           grid[emptyRow][emptyCol] = grid[newRow][newCol];
           grid[newRow][newCol] = 0;
           emptyRow = newRow;
@@ -132,50 +128,14 @@
         return false;
       }
 
-      // Render the grid
-      function renderGrid() {
-        const gridElement = document.getElementById('game-grid');
-        gridElement.innerHTML = '';
-        for (let i = 0; i < 5; i++) {
-          for (let j = 0; j < 5; j++) {
-            const cell = document.createElement('div');
-            cell.className = `puzzle-cell ${grid[i][j] === 0 ? 'empty' : ''}`;
-            cell.textContent = grid[i][j] === 0 ? '' : grid[i][j];
-            gridElement.appendChild(cell);
-          }
-        }
-      }
-
-      // Check if the puzzle is solved
-      function checkWin() {
-        let num = 1;
-        for (let i = 0; i < 5; i++) {
-          for (let j = 0; j < 5; j++) {
-            if (i === 4 && j === 4) {
-              if (grid[i][j] !== 0) return false;
-            } else {
-              if (grid[i][j] !== num++) return false;
-            }
-          }
-        }
-        return true;
-      }
-
-      // Update the timer
-      function updateTimer() {
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        const mins = Math.floor(elapsed / 60);
-        const secs = elapsed % 60;
-        document.getElementById('game-timer').textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-      }
-
-      // Auto-sort the puzzle
+      // Auto-sort the puzzle (FIXED: Use a copy of shuffleMoves)
       function autoSort() {
         if (isAutoSorting) return;
         isAutoSorting = true;
         document.getElementById('auto-sort-btn').disabled = true;
 
-        const solveSequence = shuffleMoves.reverse().map(move => {
+        // Clone shuffleMoves to avoid modifying the original array
+        const solveSequence = shuffleMoves.slice().reverse().map(move => {
           const reverseMoves = { 'w': 's', 's': 'w', 'a': 'd', 'd': 'a' };
           return reverseMoves[move];
         });
@@ -193,11 +153,11 @@
         }, 200);
       }
 
-      // Reset the game
+      // Reset the game (FIXED: Re-initialize shuffleMoves)
       function resetGame() {
         clearInterval(timerInterval);
         grid = JSON.parse(JSON.stringify(initialGrid));
-        emptyRow = initialEmptyRow; // Restore initial empty position
+        emptyRow = initialEmptyRow;
         emptyCol = initialEmptyCol;
         renderGrid();
         document.getElementById('game-timer').textContent = '00:00';
@@ -205,6 +165,7 @@
         document.getElementById('auto-sort-btn').style.display = 'inline-block';
         document.getElementById('reset-btn').style.display = 'none';
       }
+
 
       // Start the game
       function startGame() {
