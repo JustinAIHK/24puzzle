@@ -12,7 +12,8 @@
     Time: <span id="game-timer">00:00</span>
   </div>
   <button id="start-btn" style="padding: 10px 20px; background: #0073aa; color: white; border: none; cursor: pointer; margin-top: 20px;">Start Game</button>
-  <button id="auto-sort-btn" style="padding: 10px 20px; background: #28a745; color: white; border: none; cursor: pointer; margin-top: 10px;">Auto Sort</button>
+  <button id="auto-sort-btn" style="padding: 10px 20px; background: #28a745; color: white; border: none; cursor: pointer; margin-top: 10px; display: none;">Auto Sort</button>
+  <button id="reset-btn" style="padding: 10px 20px; background: #dc3545; color: white; border: none; cursor: pointer; margin-top: 10px; display: none;">Reset Game</button>
 </div>
 
 <script>
@@ -31,8 +32,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     shuffleGrid();
     renderGrid();
-    document.getElementById('start-btn').disabled = true;
-    document.getElementById('auto-sort-btn').disabled = false;
+    startTime = Date.now();
+    timerInterval = setInterval(updateTimer, 1000);
+    document.getElementById('start-btn').style.display = 'none'; // Hide Start button
+    document.getElementById('auto-sort-btn').style.display = 'inline-block'; // Show Auto Sort button
+    document.getElementById('reset-btn').style.display = 'inline-block'; // Show Reset button
   }
 
   function shuffleGrid() {
@@ -41,8 +45,6 @@ document.addEventListener('DOMContentLoaded', function() {
       const dir = directions[Math.floor(Math.random() * directions.length)];
       move(dir, true);
     }
-    startTime = Date.now();
-    timerInterval = setInterval(updateTimer, 1000);
   }
 
   function renderGrid() {
@@ -123,7 +125,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function getSolveSequence() {
     // A simple sequence to solve the puzzle (for demonstration purposes)
-    // This is not optimal but works for small grids
     const sequence = [];
     for (let i = 0; i < 5; i++) {
       for (let j = 0; j < 5; j++) {
@@ -154,8 +155,21 @@ document.addEventListener('DOMContentLoaded', function() {
     return sequence;
   }
 
+  function resetGame() {
+    clearInterval(timerInterval); // Stop the timer
+    grid = []; // Clear the grid
+    emptyRow = 4; // Reset empty space position
+    emptyCol = 4;
+    renderGrid(); // Render empty grid
+    document.getElementById('game-timer').textContent = '00:00'; // Reset timer display
+    document.getElementById('start-btn').style.display = 'inline-block'; // Show Start button
+    document.getElementById('auto-sort-btn').style.display = 'none'; // Hide Auto Sort button
+    document.getElementById('reset-btn').style.display = 'none'; // Hide Reset button
+  }
+
   document.getElementById('start-btn').addEventListener('click', initGame);
   document.getElementById('auto-sort-btn').addEventListener('click', autoSort);
+  document.getElementById('reset-btn').addEventListener('click', resetGame);
 
   // Keyboard controls
   document.addEventListener('keydown', (e) => {
