@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let validMoves = 0;
     
     // Only track valid moves
-    while (validMoves < 100) {
+    while (validMoves < 200) {
       const dir = directions[Math.floor(Math.random() * directions.length)];
       if (move(dir, true, true)) { // Pass true to indicate shuffling
         shuffleMoves.push(dir);
