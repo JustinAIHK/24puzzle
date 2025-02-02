@@ -19,8 +19,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   let grid = [], emptyRow = 4, emptyCol = 4, timerInterval, startTime, isAutoSorting = false;
-
-
+  let initialGrid = [];
 
   function initGame() {
     grid = [];
@@ -33,12 +32,13 @@ document.addEventListener('DOMContentLoaded', function() {
       grid.push(row);
     }
     shuffleGrid();
+    initialGrid = JSON.parse(JSON.stringify(grid));
     renderGrid();
     startTime = Date.now();
     timerInterval = setInterval(updateTimer, 1000);
-    document.getElementById('start-btn').style.display = 'none'; // Hide Start button
-    document.getElementById('auto-sort-btn').style.display = 'inline-block'; // Show Auto Sort button
-    document.getElementById('reset-btn').style.display = 'inline-block'; // Show Reset button
+    document.getElementById('start-btn').style.display = 'none';
+    document.getElementById('auto-sort-btn').style.display = 'inline-block';
+    document.getElementById('reset-btn').style.display = 'inline-block';
   }
 
   function shuffleGrid() {
@@ -66,10 +66,10 @@ document.addEventListener('DOMContentLoaded', function() {
     let newRow = emptyRow;
     let newCol = emptyCol;
 
-    if (dir === 'w' && emptyRow < 4) newRow++; // Move number below up
-    else if (dir === 's' && emptyRow > 0) newRow--; // Move number above down
-    else if (dir === 'a' && emptyCol < 4) newCol++; // Move number to the right left
-    else if (dir === 'd' && emptyCol > 0) newCol--; // Move number to the left right
+    if (dir === 'w' && emptyRow < 4) newRow++;
+    else if (dir === 's' && emptyRow > 0) newRow--;
+    else if (dir === 'a' && emptyCol < 4) newCol++;
+    else if (dir === 'd' && emptyCol > 0) newCol--;
 
     if (newRow !== emptyRow || newCol !== emptyCol) {
       grid[emptyRow][emptyCol] = grid[newRow][newCol];
@@ -122,33 +122,31 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       move(solveSequence[step]);
       step++;
-    }, 500); // Adjust speed (500ms per move)
+    }, 500);
   }
 
   function getSolveSequence() {
-    // A simple sequence to solve the puzzle (for demonstration purposes)
     const sequence = [];
     for (let i = 0; i < 5; i++) {
       for (let j = 0; j < 5; j++) {
-        if (i === 4 && j === 4) continue; // Skip the empty space
+        if (i === 4 && j === 4) continue;
         const targetRow = Math.floor((grid[i][j] - 1) / 5);
         const targetCol = (grid[i][j] - 1) % 5;
         if (i !== targetRow || j !== targetCol) {
-          // Move the number to its correct position
           while (i < targetRow) {
-            sequence.push('s'); // Move down
+            sequence.push('s');
             i++;
           }
           while (i > targetRow) {
-            sequence.push('w'); // Move up
+            sequence.push('w');
             i--;
           }
           while (j < targetCol) {
-            sequence.push('d'); // Move right
+            sequence.push('d');
             j++;
           }
           while (j > targetCol) {
-            sequence.push('a'); // Move left
+            sequence.push('a');
             j--;
           }
         }
@@ -158,22 +156,22 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function resetGame() {
-    clearInterval(timerInterval); // Stop the timer
-    grid = []; // Clear the grid
-    emptyRow = 4; // Reset empty space position
+    clearInterval(timerInterval);
+    grid = JSON.parse(JSON.stringify(initialGrid));
+    emptyRow = 4;
     emptyCol = 4;
-    renderGrid(); // Render empty grid
-    document.getElementById('game-timer').textContent = '00:00'; // Reset timer display
-    document.getElementById('start-btn').style.display = 'inline-block'; // Show Start button
-    document.getElementById('auto-sort-btn').style.display = 'none'; // Hide Auto Sort button
-    document.getElementById('reset-btn').style.display = 'none'; // Hide Reset button
+    renderGrid();
+    document.getElementById('game-timer').textContent = '00:00';
+    document.getElementById('start-btn').style.display = 'inline-block';
+    document.getElementById('auto-sort-btn').style.display = 'none';
+    document.getElementById('reset-btn').style.display = 'none';
   }
 
   document.getElementById('start-btn').addEventListener('click', initGame);
   document.getElementById('auto-sort-btn').addEventListener('click', autoSort);
   document.getElementById('reset-btn').addEventListener('click', resetGame);
 
-  // Keyboard controls
+  // Keyboard controls (including R key for reset)
   document.addEventListener('keydown', (e) => {
     const key = e.key.toLowerCase();
     if (['w', 'a', 's', 'd'].includes(key)) {
