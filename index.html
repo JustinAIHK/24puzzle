@@ -42,13 +42,24 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('reset-btn').style.display = 'inline-block';
   }
 
-  function shuffleGrid() {
-    const directions = ['w', 's', 'a', 'd'];
-    for (let i = 0; i < 1000; i++) {
-      const dir = directions[Math.floor(Math.random() * directions.length)];
-      move(dir, true);
-    }
-  }
+ // function shuffleGrid() {
+    //const directions = ['w', 's', 'a', 'd'];
+    //for (let i = 0; i < 1000; i++) {
+      //const dir = directions[Math.floor(Math.random() * directions.length)];
+      //move(dir, true);
+    //}
+  //} 
+  let movesHistory = []; // Add this line to track moves  
+  
+  function shuffleGrid() {  
+    const directions = ['w', 's', 'a', 'd'];  
+    for (let i = 0; i < 1000; i++) {  
+      const dir = directions[Math.floor(Math.random() * directions.length)];  
+      movesHistory.push(dir); // Track the move made  
+      move(dir, true);  
+    }  
+  }  
+                          
 
   function renderGrid() {
     const gridElement = document.getElementById('game-grid');
