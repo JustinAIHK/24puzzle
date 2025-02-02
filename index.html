@@ -13,12 +13,23 @@
   </div>
   <button id="start-btn" style="padding: 10px 20px; background: #0073aa; color: white; border: none; cursor: pointer; margin-top: 20px;">Start Game</button>
   <button id="auto-sort-btn" style="padding: 10px 20px; background: #28a745; color: white; border: none; cursor: pointer; margin-top: 10px; display: none;">Auto Sort</button>
-  <button id="reset-btn" style="padding: 10px 20px; background: #dc3545; color: white; border: none; cursor: pointer; margin-top: 10px; display: none;">Reset Game</button>
+  <button id="reset-btn" style="padding: 10px 20px; background: #dc3545; color: white; border: none; cursor: pointer; margin-top: 10px; display: none;">Reset Game (R)</button>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   let grid = [], emptyRow = 4, emptyCol = 4, timerInterval, startTime, isAutoSorting = false;
+
+  // Keyboard controls
+  document.addEventListener('keydown', (e) => {
+    const key = e.key.toLowerCase();
+    if (['w', 'a', 's', 'd'].includes(key)) {
+      move(key);
+    }
+    // Add "R" key support for reset
+    else if (key === 'r') {
+      resetGame();
+    }
 
   function initGame() {
     grid = [];
