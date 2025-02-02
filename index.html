@@ -67,6 +67,7 @@
         startTime,
         isAutoSorting = false;
       let initialGrid = [];
+      let initialEmptyRow, initialEmptyCol; // Track initial empty position
       let shuffleMoves = [];
 
       // Initialize the game grid in a shuffled state
@@ -82,6 +83,11 @@
         }
         shuffleGrid();
         initialGrid = JSON.parse(JSON.stringify(grid));
+        
+        // Capture initial empty position after shuffling
+        initialEmptyRow = emptyRow;
+        initialEmptyCol = emptyCol;
+        
         renderGrid();
       }
 
@@ -91,7 +97,7 @@
         const directions = ['w', 's', 'a', 'd'];
         let validMoves = 0;
 
-        while (validMoves < 500) {
+        while (validMoves < 100) {
           const dir = directions[Math.floor(Math.random() * directions.length)];
           if (move(dir, true, true)) {
             shuffleMoves.push(dir);
@@ -100,7 +106,7 @@
         }
       }
 
-      // Move tiles
+      // Move tiles (fixed to ensure single empty cell)
       function move(dir, isShuffling = false, trackMove = false) {
         let newRow = emptyRow;
         let newCol = emptyCol;
@@ -111,6 +117,7 @@
         else if (dir === 'd' && emptyCol > 0) newCol--;
 
         if (newRow !== emptyRow || newCol !== emptyCol) {
+          // Ensure only one empty cell exists
           grid[emptyRow][emptyCol] = grid[newRow][newCol];
           grid[newRow][newCol] = 0;
           emptyRow = newRow;
@@ -190,8 +197,8 @@
       function resetGame() {
         clearInterval(timerInterval);
         grid = JSON.parse(JSON.stringify(initialGrid));
-        emptyRow = 4;
-        emptyCol = 4;
+        emptyRow = initialEmptyRow; // Restore initial empty position
+        emptyCol = initialEmptyCol;
         renderGrid();
         document.getElementById('game-timer').textContent = '00:00';
         document.getElementById('start-btn').style.display = 'inline-block';
