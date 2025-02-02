@@ -20,16 +20,7 @@
 document.addEventListener('DOMContentLoaded', function() {
   let grid = [], emptyRow = 4, emptyCol = 4, timerInterval, startTime, isAutoSorting = false;
 
-  // Keyboard controls
-  document.addEventListener('keydown', (e) => {
-    const key = e.key.toLowerCase();
-    if (['w', 'a', 's', 'd'].includes(key)) {
-      move(key);
-    }
-    // Add "R" key support for reset
-    else if (key === 'r') {
-      resetGame();
-    }
+
 
   function initGame() {
     grid = [];
@@ -187,6 +178,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const key = e.key.toLowerCase();
     if (['w', 'a', 's', 'd'].includes(key)) {
       move(key);
+    }
+    else if (key === 'r') {
+      resetGame();
     }
   });
 });
