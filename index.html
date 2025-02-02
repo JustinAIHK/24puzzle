@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>24 Puzzle Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .game-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 50px);
+      grid-template-rows: repeat(5, 50px);
+      gap: 5px;
+      margin: 20px auto;
+    }
+    .cell {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #6200ea;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .cell.empty {
+      background-color: #ddd;
+      cursor: not-allowed;
+    }
+    .controls {
+      margin-top: 20px;
+    }
+    .controls button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 5px;
+      border: none;
+      border-radius: 5px;
+      background-color: #6200ea;
+      color: white;
+      cursor: pointer;
+    }
+    .controls button:hover {
+      background-color: #3700b3;
+    }
+    .timer {
+      font-size: 18px;
+      margin-top: 10px;
+    }
+    .start-button {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>24 Puzzle Game</h1>
+    <div class="grid" id="grid"></div>
+    <div class="controls">
+      <button onclick="move('w')">Up (W)</button>
+      <button onclick="move('s')">Down (S)</button>
+      <button onclick="move('a')">Left (A)</button>
+      <button onclick="move('d')">Right (D)</button>
+    </div>
+    <div class="timer">Time: <span id="time">00:00</span></div>
+    <button class="start-button" onclick="startGame()">Start Game</button>
+  </div>
+
+  <script>
+    let grid = [];
+    let emptyRow = 4;
+    let emptyCol = 4;
+    let startTime;
+    let timerInterval;
+
+    // Initialize the grid
+    function initializeGrid() {
+      grid = [];
+      let num = 1;
+      for (let i = 0; i < 5; i++) {
+        let row = [];
+        for (let j = 0; j < 5; j++) {
+          row.push((i === 4 && j === 4) ? 0 : num++);
+        }
+        grid.push(row);
+      }
+      renderGrid();
+    }
+
+    // Shuffle the grid
+    function shuffleGrid() {
+      const directions = ['w', 's', 'a', 'd'];
+      for (let i = 0; i < 1000; i++) {
+        const dir = directions[Math.floor(Math.random() * directions.length)];
+        move(dir, true);
+      }
+      startTime = Date.now();
+      timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    // Render the grid
+    function renderGrid() {
+      const gridElement = document.getElementById('grid');
+      gridElement.innerHTML = '';
+      for (let i = 0; i < 5; i++) {
+        for (let j = 0; j < 5; j++) {
+          const cell = document.createElement('div');
+          cell.className = `cell ${grid[i][j] === 0 ? 'empty' : ''}`;
+          cell.textContent = grid[i][j] === 0 ? '' : grid[i][j];
+          gridElement.appendChild(cell);
+        }
+      }
+    }
+
+    // Move tiles
+    function move(dir, isShuffling = false) {
+      let newRow = emptyRow;
+      let newCol = emptyCol;
+
+      if (dir === 'w' && emptyRow < 4) newRow++; // Move number below up
+      else if (dir === 's' && emptyRow > 0) newRow--; // Move number above down
+      else if (dir === 'a' && emptyCol < 4) newCol++; // Move number to the right left
+      else if (dir === 'd' && emptyCol > 0) newCol--; // Move number to the left right
+
+      if (newRow !== emptyRow || newCol !== emptyCol) {
+        grid[emptyRow][emptyCol] = grid[newRow][newCol];
+        grid[newRow][newCol] = 0;
+        emptyRow = newRow;
+        emptyCol = newCol;
+        renderGrid();
+        if (!isShuffling && checkWin()) {
+          clearInterval(timerInterval);
+          alert(`Congratulations! You solved the puzzle in ${document.getElementById('time').textContent}!`);
+        }
+      }
+    }
+
+    // Check if the puzzle is solved
+    function checkWin() {
+      let num = 1;
+      for (let i = 0; i < 5; i++) {
+        for (let j = 0; j < 5; j++) {
+          if (i === 4 && j === 4) {
+            if (grid[i][j] !== 0) return false;
+          } else {
+            if (grid[i][j] !== num++) return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    // Update the timer
+    function updateTimer() {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      const mins = Math.floor(elapsed / 60);
+      const secs = elapsed % 60;
+      document.getElementById('time').textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      const key = e.key.toLowerCase();
+      if (['w', 'a', 's', 'd'].includes(key)) {
+        move(key);
+      }
+    });
+
+    // Start the game
+    function startGame() {
+      initializeGrid();
+      shuffleGrid();
+      document.querySelector('.start-button').disabled = true;
+    }
+  </script>
+</body>
+</html>
